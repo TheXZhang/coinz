@@ -1,4 +1,5 @@
-# coinz
+# Informatic large practical coinz
 
-matriculation number: s1604556
 Name: Xu Zhang
+matriculation number: s1604556  
+
