@@ -6,9 +6,15 @@ apply plugin: 'kotlin-android-extensions'
 
 android {
     compileSdkVersion 28
+
+    compileOptions{
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
     defaultConfig {
         applicationId "com.example.s1604556.coinz"
-        minSdkVersion 26
+        minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
         versionName "1.0"
@@ -37,7 +43,7 @@ dependencies {
     implementation 'com.android.support:support-v4:28.0.0'
 
     implementation  'com.google.android.gms:play-services-location:15.0.1'
-    //implementation  'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
+    implementation  'com.mapbox.mapboxsdk:mapbox-android-sdk:6.5.0'
     implementation  'com.mapbox.mapboxsdk:mapbox-android-plugin-locationlayer:0.5.2'
 
     testImplementation 'junit:junit:4.12'
