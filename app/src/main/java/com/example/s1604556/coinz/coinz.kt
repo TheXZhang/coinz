@@ -1,5 +1,6 @@
 package com.example.s1604556.coinz
 
+import android.content.Context
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -34,6 +35,9 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
 
+    private var downloadDate = "" // Format: YYYY/MM/DD
+    private val preferencesFile = "MyPrefsFile" // for strong preferences
+
     private lateinit var originLocation : Location
     private lateinit var permissionsManager : PermissionsManager
     private lateinit var locationEngine : LocationEngine
@@ -50,6 +54,8 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
+
+        DownloadFileTask(DownloadCompleteRunner).execute("http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson")
 
         //fab.setOnClickListener { view ->
             //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
@@ -70,6 +76,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             //make location info available
             enableLocation()
+
         }
     }
 
@@ -159,11 +166,21 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
     }
 
-    public override  fun onStart(){
+    override  fun onStart(){
         super.onStart()
         mapView?.onStart()
 
+        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
+
+        downloadDate = settings.getString("lastDownloadDate","")
+
+        Log.d(tag, "[onStart] recalled lastDownloadDate is '$downloadDate'")
+
+
     }
+
+
+
 
    /* override fun onCreateOptionsMenu(menu: Menu): Boolean {
         // Inflate the menu; this adds items to the action bar if it is present.
