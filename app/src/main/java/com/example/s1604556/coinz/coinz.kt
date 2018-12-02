@@ -1,6 +1,7 @@
 package com.example.s1604556.coinz
 
 import android.content.Context
+import android.content.pm.FeatureGroupInfo
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
@@ -8,6 +9,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import com.example.s1604556.coinz.DownloadCompleteRunner.result
 import com.example.s1604556.coinz.R.id.toolbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -15,8 +17,11 @@ import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.geojson.FeatureCollection
+import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.Mapbox.getInstance
+import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
@@ -76,6 +81,14 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             //make location info available
             enableLocation()
+
+            val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
+            val feature =fc.features()
+            for (item in feature!!){
+                val p=item.geometry() as Point
+                val c=LatLng(p.latitude(),p.longitude())
+                map?.addMarker(MarkerOptions().position(c))
+            }
 
         }
     }
