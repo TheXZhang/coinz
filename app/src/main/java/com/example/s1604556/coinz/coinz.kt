@@ -57,6 +57,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private lateinit var permissionsManager : PermissionsManager
     private lateinit var locationEngine : LocationEngine
     private lateinit var locationLayerPlugin : LocationLayerPlugin
+    private var _initializing : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -72,11 +73,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         DownloadFileTask(DownloadCompleteRunner).execute("http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson")
 
-        collect.setOnClickListener { view ->
-            Snackbar.make(view, "You have collected ", Snackbar.LENGTH_LONG)
-                    .setAction("Action", null).show()
-            updateMap()
-        }
+
 
     }
 
@@ -107,7 +104,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 val value=j?.get("value").toString().drop(1).dropLast(1)
 
                 val markerColour=j?.get("marker-color").toString()
-                Log.d("testing",markerColour)
+
 
                 ic = when (markerColour) {
                     "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
@@ -125,35 +122,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
     }
 
-
-    private fun updateMap(){
-        val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
-        val newlist=Collect.collectingCoins(playerposition,coinList)
-        addmarker(newlist)
-    }
-
-
-
-
-
-
-
-    private fun addmarker(coins:ArrayList<Coin>){
-        var ic: com.mapbox.mapboxsdk.annotations.Icon
-        for (coin in coins){
-
-            ic = when (coin.colour) {
-                "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
-                "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
-                "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
-
-                else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
-            }
-
-            map?.addMarker(MarkerOptions().position(coin.position).title(coin.id).snippet(coin.currency+coin.value).icon(ic))
-            coinList.add(coin)
-        }
-    }
 
 
 
@@ -219,6 +187,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }else{
             originLocation = location
             setCameraPosition(originLocation)
+            _initializing= true                                     //making sure initialising is successful, so that button press does not crash the app
         }
     }
 
@@ -247,8 +216,21 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
 
     override  fun onStart(){
+
         super.onStart()
         mapView?.onStart()
+
+
+
+        collect.setOnClickListener { view ->
+            if (!_initializing) {
+                Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+            }else{
+                Snackbar.make(view, "Coins collected", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                updateMap()
+            }
+
+        }
 
 
         //val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
@@ -257,7 +239,33 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         //Log.d(tag, "[onStart] recalled lastDownloadDate is '$downloadDate'")
 
+    }
 
+    private fun updateMap(){
+        val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
+        val newlist=Collect.collectingCoins(playerposition,coinList)
+        addmarker(newlist)
+    }
+
+
+
+    private fun addmarker(coins:ArrayList<Coin>){
+        var ic: com.mapbox.mapboxsdk.annotations.Icon
+        map?.clear()
+        for (coin in coins){
+
+            ic = when (coin.colour) {
+                "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
+                "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
+                "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
+
+                else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
+            }
+
+            map?.addMarker(MarkerOptions().position(coin.position).title(coin.id).snippet(coin.currency+coin.value).icon(ic))
+
+        }
+        coinList=coins
     }
 
 
