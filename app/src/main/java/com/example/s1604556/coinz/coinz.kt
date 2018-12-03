@@ -2,25 +2,33 @@ package com.example.s1604556.coinz
 
 import android.content.Context
 import android.content.pm.FeatureGroupInfo
+import android.graphics.Bitmap
+import android.graphics.BitmapFactory
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Bundle
 import android.support.design.widget.Snackbar
+import android.support.v4.content.res.ResourcesCompat
+import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import com.example.s1604556.coinz.DownloadCompleteRunner.result
-import com.example.s1604556.coinz.R.id.toolbar
+//import com.example.s1604556.coinz.R.id.toolbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
 import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
+import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
 import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.Mapbox.getInstance
+import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
 import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
@@ -32,6 +40,7 @@ import com.mapbox.mapboxsdk.plugins.locationlayer.modes.CameraMode
 import com.mapbox.mapboxsdk.plugins.locationlayer.modes.RenderMode
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 
+
 import kotlinx.android.synthetic.main.activity_coinz.*
 
 class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,PermissionsListener {
@@ -39,6 +48,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
+    private var coinList=ArrayList<Coin>()
 
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val preferencesFile = "MyPrefsFile" // for strong preferences
@@ -51,7 +61,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_coinz)
-        setSupportActionBar(toolbar)
+        //setSupportActionBar(toolbar)
 
         getInstance(this,"pk.eyJ1IjoiczE2MDQ1NTYiLCJhIjoiY2pud2Y5ZXB4MDFhNDNxbjdueDg2YTFubCJ9.mDJ39QOCIA1DBnpFuVZC9A")
 
@@ -62,10 +72,12 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         DownloadFileTask(DownloadCompleteRunner).execute("http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson")
 
-        //fab.setOnClickListener { view ->
-            //Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-                   // .setAction("Action", null).show()
-        //}
+        collect.setOnClickListener { view ->
+            Snackbar.make(view, "You have collected ", Snackbar.LENGTH_LONG)
+                    .setAction("Action", null).show()
+            updateMap()
+        }
+
     }
 
 
@@ -81,17 +93,69 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             //make location info available
             enableLocation()
-
             val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
             val feature =fc.features()
+            var ic: com.mapbox.mapboxsdk.annotations.Icon
+
             for (item in feature!!){
                 val p=item.geometry() as Point
                 val c=LatLng(p.latitude(),p.longitude())
-                map?.addMarker(MarkerOptions().position(c))
+                val j=item.properties()
+                val currency= j?.get("currency").toString().drop(1).dropLast(1)
+
+                val id= j?.get("id").toString().drop(1).dropLast(1)
+                val value=j?.get("value").toString().drop(1).dropLast(1)
+
+                val markerColour=j?.get("marker-color").toString()
+                Log.d("testing",markerColour)
+
+                ic = when (markerColour) {
+                    "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
+                    "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
+                    "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
+
+                    else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
+                }
+
+                map?.addMarker(MarkerOptions().position(c).title(id).snippet(currency+value).icon(ic))
+                coinList.add(Coin(id,currency,value,c,markerColour))
             }
+
 
         }
     }
+
+
+    private fun updateMap(){
+        val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
+        val newlist=Collect.collectingCoins(playerposition,coinList)
+        addmarker(newlist)
+    }
+
+
+
+
+
+
+
+    private fun addmarker(coins:ArrayList<Coin>){
+        var ic: com.mapbox.mapboxsdk.annotations.Icon
+        for (coin in coins){
+
+            ic = when (coin.colour) {
+                "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
+                "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
+                "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
+
+                else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
+            }
+
+            map?.addMarker(MarkerOptions().position(coin.position).title(coin.id).snippet(coin.currency+coin.value).icon(ic))
+            coinList.add(coin)
+        }
+    }
+
+
 
     private fun enableLocation(){
         if (PermissionsManager.areLocationPermissionsGranted(this)){
@@ -179,15 +243,19 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
     }
 
+
+
+
     override  fun onStart(){
         super.onStart()
         mapView?.onStart()
 
-        val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
 
-        downloadDate = settings.getString("lastDownloadDate","")
+        //val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
 
-        Log.d(tag, "[onStart] recalled lastDownloadDate is '$downloadDate'")
+        //downloadDate = settings.getString("lastDownloadDate","")
+
+        //Log.d(tag, "[onStart] recalled lastDownloadDate is '$downloadDate'")
 
 
     }
