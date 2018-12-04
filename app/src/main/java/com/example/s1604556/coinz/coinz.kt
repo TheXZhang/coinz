@@ -1,6 +1,7 @@
 package com.example.s1604556.coinz
 
 import android.content.Context
+import android.content.Intent
 import android.content.pm.FeatureGroupInfo
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -116,6 +117,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
                 map?.addMarker(MarkerOptions().position(c).title(id).snippet(currency+value).icon(ic))
                 coinList.add(Coin(id,currency,value,c,markerColour))
+
             }
 
 
@@ -221,18 +223,31 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         mapView?.onStart()
 
 
-
         collect.setOnClickListener { view ->
             if (!_initializing) {
                 Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
             }else{
-                Snackbar.make(view, "Coins collected", Snackbar.LENGTH_LONG).setAction("Action", null).show()
-                updateMap()
+                val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
+                val newlist=Collect.collectingCoins(playerposition,coinList)
+
+
+
+                Snackbar.make(view, "Coins colleacted", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                renewMap(newlist)
             }
 
         }
 
+        wallet.setOnClickListener{
+            val intent = Intent(this,WalletScreen::class.java)
+            startActivity(intent)
+        }
 
+        bank.setOnClickListener{
+            val intent = Intent(this,Bankscreen::class.java)
+            startActivity(intent)
+
+        }
         //val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
 
         //downloadDate = settings.getString("lastDownloadDate","")
@@ -241,15 +256,9 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
     }
 
-    private fun updateMap(){
-        val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
-        val newlist=Collect.collectingCoins(playerposition,coinList)
-        addmarker(newlist)
-    }
 
 
-
-    private fun addmarker(coins:ArrayList<Coin>){
+    private fun renewMap(coins:ArrayList<Coin>){
         var ic: com.mapbox.mapboxsdk.annotations.Icon
         map?.clear()
         for (coin in coins){
