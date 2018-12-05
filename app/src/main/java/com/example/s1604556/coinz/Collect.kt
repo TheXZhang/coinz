@@ -4,7 +4,7 @@ import android.util.Log
 import com.mapbox.mapboxsdk.geometry.LatLng
 
 object Collect{
-    val radius= 1000
+    val radius= 10000
     var walletCoins= ArrayList<Coin>()
     var wallet=Wallet(walletCoins,limit=1000,currentNo = 0)
 
