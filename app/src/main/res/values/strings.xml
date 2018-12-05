@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">coinz</string>
     <string name="action_settings">Settings</string>
+    <string name="emailpassword_status_fmt" />
+    <string name="firebase_status_fmt" />
+    <string name="signed_out" />
 </resources>

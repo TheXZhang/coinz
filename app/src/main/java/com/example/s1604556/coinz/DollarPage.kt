@@ -4,7 +4,7 @@ import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
-import android.util.Log
+
 
 class DollarPage : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
@@ -13,13 +13,22 @@ class DollarPage : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.dollar)
+        setContentView(R.layout.wallet_recycler_view)
+
+        val showList = ArrayList<Coin>()
 
         viewManager = LinearLayoutManager(this)
-        viewAdapter = DollarAdapter(Collect.wallet.coinlist)
-        Log.d("testing","the wallet list'${Collect.wallet.coinlist}'")
 
-        recyclerView = findViewById<RecyclerView>(R.id.dollar_recycler_view).apply {
+
+        for (coin in Collect.wallet.coinlist){
+            if (coin.currency=="DOLR")
+                showList.add(coin)
+        }
+
+        viewAdapter = DollarAdapter(showList)
+
+
+        recyclerView = findViewById<RecyclerView>(R.id.wallet_recycler_view).apply {
             // use this setting to improve performance if you know that changes
             // in content do not change the layout size of the RecyclerView
             setHasFixedSize(true)

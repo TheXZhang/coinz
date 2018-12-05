@@ -16,6 +16,7 @@ import android.support.v7.app.AppCompatActivity
 import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import com.example.s1604556.coinz.DownloadCompleteRunner.result
 //import com.example.s1604556.coinz.R.id.toolbar
 import com.mapbox.android.core.location.LocationEngine
@@ -223,16 +224,14 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         mapView?.onStart()
 
 
-        collect.setOnClickListener { view ->
+        collect.setOnClickListener {
             if (!_initializing) {
-                Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                //Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
+                Toast.makeText(this@coinz, "Please wait while locate your position", Toast.LENGTH_SHORT).show()
             }else{
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
                 val newlist=Collect.collectingCoins(playerposition,coinList)
 
-
-
-                Snackbar.make(view, "Coins colleacted", Snackbar.LENGTH_LONG).setAction("Action", null).show()
                 renewMap(newlist)
             }
 
