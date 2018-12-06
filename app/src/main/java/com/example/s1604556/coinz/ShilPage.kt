@@ -19,7 +19,7 @@ class ShilPage : AppCompatActivity() {
         viewManager = LinearLayoutManager(this)
 
 
-        for (coin in Collect.wallet.coinlist){
+        for (coin in WalletObject.wallet.coinlist){
             if (coin.currency=="SHIL")
                 showList.add(coin)
         }

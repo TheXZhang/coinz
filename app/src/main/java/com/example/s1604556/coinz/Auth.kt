@@ -8,11 +8,9 @@ import android.util.Log
 import android.view.View
 import android.widget.Toast
 import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.auth.FirebaseAuthSettings
 import com.google.firebase.auth.FirebaseUser
-import com.google.firebase.database.DataSnapshot
-import com.google.firebase.database.DatabaseError
-import com.google.firebase.database.FirebaseDatabase
-import com.google.firebase.database.ValueEventListener
+import com.google.firebase.database.*
 
 
 import kotlinx.android.synthetic.main.auth_activity.*
@@ -20,6 +18,8 @@ import kotlinx.android.synthetic.main.auth_activity.*
 class Auth : AppCompatActivity(), View.OnClickListener{
 
     private lateinit var auth: FirebaseAuth
+    private lateinit var walletReference : DatabaseReference
+    private lateinit var databaseReference: DatabaseReference
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,6 +31,9 @@ class Auth : AppCompatActivity(), View.OnClickListener{
         entergame.setOnClickListener(this)
 
         auth= FirebaseAuth.getInstance()
+        databaseReference = FirebaseDatabase.getInstance().reference
+
+
     }
 
 
@@ -39,8 +42,9 @@ class Auth : AppCompatActivity(), View.OnClickListener{
         // Check if user is signed in (non-null) and update UI accordingly.
         val currentUser = auth.currentUser
         updateUI(currentUser)
+        retrive()
 
-        basicReadWrite()
+
 
     }
     // [END on_start_check_user]
@@ -64,6 +68,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                                 Toast.LENGTH_SHORT).show()
                         Log.d(TAG, "createUserWithEmail:success")
                         val user = auth.currentUser
+                        writeNewUser(user!!.uid,user.email)
                         updateUI(user)
                     } else {
                         // If sign in fails, display a message to the user.
@@ -177,9 +182,8 @@ class Auth : AppCompatActivity(), View.OnClickListener{
         }
     }
 
-    private fun writeNewUser(userId: String, name: String, email: String?) {
-        val user = User(name, email)
-        database.child("users").child(userId).setValue(user)
+    private fun writeNewUser(userId: String,email: String?) {
+        databaseReference.child("users").child(userId).setValue(email)
     }
 
     override fun onClick(v: View) {
@@ -200,40 +204,42 @@ class Auth : AppCompatActivity(), View.OnClickListener{
         private const val TAG = "EmailPassword"
     }
 
+    private fun retrive(){
+        val user= auth.currentUser
+        Log.d("testing","'$user'")
+        if (user!=null){
 
+            val walletListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    WalletObject.wallet.coinlist.clear()
+                    WalletObject.wallet.currentNo=0
+                    WalletObject.wallet.limit=1000
+                    for (dataSS in dataSnapshot.children){
+                        WalletObject.wallet.coinlist.add(dataSS.getValue(Coin::class.java)!!)
+                    }
+                    Log.d("testing","{${WalletObject.wallet}}")
+                }
 
-    fun basicReadWrite() {
-        // [START write_message]
-        // Write a message to the database
-        val database = FirebaseDatabase.getInstance()
-        val myRef = database.getReference("message")
-
-        myRef.setValue("Hello, World!")
-        // [END write_message]
-
-        // [START read_message]
-        // Read from the database
-        myRef.addValueEventListener(object : ValueEventListener {
-            override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                val value = dataSnapshot.getValue(String::class.java)
-                Log.d(TAG, "Value is: $value")
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Log.w(TAG, "loadPost:onCancelled", databaseError.toException())
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
             }
 
-            override fun onCancelled(error: DatabaseError) {
-                // Failed to read value
-                Log.w(TAG, "Failed to read value.", error.toException())
-
-            }
-        })
-        // [END read_message]
+            walletReference= databaseReference.child("users").child(user.uid).child("wallet")
+            walletReference.addValueEventListener(walletListener)
+        }
     }
 
 
 
 
 
-
-
 }
+
+
+
+

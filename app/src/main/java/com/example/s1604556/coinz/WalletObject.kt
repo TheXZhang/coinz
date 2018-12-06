@@ -1,12 +1,15 @@
 package com.example.s1604556.coinz
 
 import android.util.Log
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 import com.mapbox.mapboxsdk.geometry.LatLng
 
-object Collect{
+object WalletObject {
     val radius= 10000
-    var walletCoins= ArrayList<Coin>()
-    var wallet=Wallet(walletCoins,limit=1000,currentNo = 0)
+    var wallet=Wallet(coinlist = ArrayList(),limit=1000,currentNo = 0)
+    private lateinit var walletReference : DatabaseReference
+
 
     fun collectingCoins(playerPosition:LatLng,coinList:ArrayList<Coin>): ArrayList<Coin> {
         val removelist = ArrayList<Coin>()
@@ -23,12 +26,19 @@ object Collect{
                 coinList.remove(coin)
                 wallet.addcoin(coin)
             }
-        }else {
-            return coinList
+
         }
+        val auth= FirebaseAuth.getInstance()
+
+        walletReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("wallet")
+        walletReference.setValue(wallet)
+
+
 
         return coinList
     }
+
 
 
 }

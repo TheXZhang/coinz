@@ -230,7 +230,8 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 Toast.makeText(this@coinz, "Please wait while locate your position", Toast.LENGTH_SHORT).show()
             }else{
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
-                val newlist=Collect.collectingCoins(playerposition,coinList)
+                val newlist=WalletObject.collectingCoins(playerposition,coinList)
+
 
                 renewMap(newlist)
             }
