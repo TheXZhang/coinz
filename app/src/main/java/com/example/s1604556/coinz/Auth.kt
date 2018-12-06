@@ -177,6 +177,11 @@ class Auth : AppCompatActivity(), View.OnClickListener{
         }
     }
 
+    private fun writeNewUser(userId: String, name: String, email: String?) {
+        val user = User(name, email)
+        database.child("users").child(userId).setValue(user)
+    }
+
     override fun onClick(v: View) {
         val i = v.id
         when (i) {
@@ -219,6 +224,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
             override fun onCancelled(error: DatabaseError) {
                 // Failed to read value
                 Log.w(TAG, "Failed to read value.", error.toException())
+
             }
         })
         // [END read_message]
