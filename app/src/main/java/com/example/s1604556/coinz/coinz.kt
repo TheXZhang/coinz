@@ -9,6 +9,7 @@ import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Bundle
+import android.os.Handler
 import android.support.design.widget.Snackbar
 import android.support.v4.content.res.ResourcesCompat
 import android.support.v4.graphics.drawable.DrawableCompat
@@ -253,10 +254,18 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
             if (!_initializing) {
                 //Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
                 Toast.makeText(this@coinz, "Please wait while locate your position", Toast.LENGTH_SHORT).show()
+                collect.isClickable=false
+                Handler().postDelayed({
+                    collect.isClickable=true
+                },2000)
+
             }else{
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
                 val newlist=WalletObject.collectingCoins(playerposition,coinList)
-
+                collect.isClickable=false
+                Handler().postDelayed({
+                    collect.isClickable=true
+                },3000)
 
                 renewMap(newlist)
             }
@@ -266,11 +275,19 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         wallet.setOnClickListener{
             val intent = Intent(this,WalletScreen::class.java)
             startActivity(intent)
+            wallet.isClickable=false
+            Handler().postDelayed({
+                wallet.isClickable=true
+            },2000)
         }
 
         bank.setOnClickListener{
             val intent = Intent(this,Bankscreen::class.java)
             startActivity(intent)
+            bank.isClickable=false
+            Handler().postDelayed({
+                bank.isClickable=true
+            },2000)
 
         }
         //val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)

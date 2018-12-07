@@ -2,6 +2,7 @@ package com.example.s1604556.coinz
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
@@ -23,6 +24,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     private lateinit var databaseReference: DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
     private var coinIDlist=ArrayList<String>()
+    private var loading=false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -74,6 +76,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                         val user = auth.currentUser
                         writeNewUser(user!!.uid,user.email)
                         updateUI(user)
+                        retrive()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "createUserWithEmail:failure", task.exception)
@@ -113,6 +116,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                         Toast.makeText(baseContext, "Wrong email or password.",
                                 Toast.LENGTH_SHORT).show()
                         updateUI(null)
+                        retrive()
                     }
 
                     // [START_EXCLUDE]
@@ -193,12 +197,36 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     override fun onClick(v: View) {
         val i = v.id
         when (i) {
-            R.id.emailCreateAccountButton -> createAccount(fieldEmail.text.toString(), fieldPassword.text.toString())
-            R.id.emailSignInButton -> signIn(fieldEmail.text.toString(), fieldPassword.text.toString())
-            R.id.signOutButton -> signOut()
+            R.id.emailCreateAccountButton -> {
+                emailCreateAccountButton.isClickable=false
+                Handler().postDelayed({
+                    emailCreateAccountButton.isClickable=true
+                },2000)
+                createAccount(fieldEmail.text.toString(), fieldPassword.text.toString())}
+            R.id.emailSignInButton -> {
+                emailSignInButton.isClickable=false
+                Handler().postDelayed({
+                    emailSignInButton.isClickable=true
+                },2000)
+                signIn(fieldEmail.text.toString(), fieldPassword.text.toString())}
+            R.id.signOutButton -> {
+                signOutButton.isClickable=false
+                Handler().postDelayed({
+                    signOutButton.isClickable=true
+                },2000)
+                signOut()}
             R.id.entergame ->{
-                val intent = Intent(this, coinz::class.java)
-                startActivity(intent)
+                entergame.isClickable=false
+                Handler().postDelayed({
+                    entergame.isClickable=true
+                },2000)
+                if (loading) {
+                    val intent = Intent(this, coinz::class.java)
+                    startActivity(intent)
+                }else{
+                    Toast.makeText(baseContext, "Slow down, still waiting for player data, please try again after couple seconds",
+                            Toast.LENGTH_SHORT).show()
+                }
             }
 
         }
@@ -223,6 +251,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
                     }
                     Log.d("testing","{${WalletObject.wallet}}")
+                    loading = true
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -237,11 +266,12 @@ class Auth : AppCompatActivity(), View.OnClickListener{
             val coinLeftListener = object : ValueEventListener {
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
-                    WalletObject.wallet.coinlist.clear()
+                    WalletObject.collectedID.clear()
                     for (d in dataSnapshot.children){
                         WalletObject.collectedID.add(d.getValue(String::class.java)!!)
                         Log.d("asdasd","the other coin id '${d.getValue(String::class.java)}'")
                     }
+                    loading = true
                 }
 
                 override fun onCancelled(databaseError: DatabaseError) {
@@ -249,12 +279,14 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                     Toast.makeText(baseContext, "Failed to load data.",
                             Toast.LENGTH_SHORT).show()
                 }
+
             }
 
             coinIDToday=databaseReference.child("users").child(user.uid).child("").child("CoinCollectedToday")
             coinIDToday.addValueEventListener(coinLeftListener)
             walletReference= databaseReference.child("users").child(user.uid).child("wallet").child("coinlist")
             walletReference.addValueEventListener(walletListener)
+
 
         }
     }
