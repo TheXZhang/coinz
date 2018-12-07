@@ -14,6 +14,7 @@ import com.google.firebase.database.*
 
 
 import kotlinx.android.synthetic.main.auth_activity.*
+import java.time.LocalDate
 
 class Auth : AppCompatActivity(), View.OnClickListener{
 
@@ -183,7 +184,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     }
 
     private fun writeNewUser(userId: String,email: String?) {
-        databaseReference.child("users").child(userId).setValue(email)
+        databaseReference.child("users").child(userId).child("Email").setValue(email)
     }
 
     override fun onClick(v: View) {
@@ -213,10 +214,10 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
                     WalletObject.wallet.coinlist.clear()
-                    WalletObject.wallet.currentNo=0
-                    WalletObject.wallet.limit=1000
+
                     for (dataSS in dataSnapshot.children){
                         WalletObject.wallet.coinlist.add(dataSS.getValue(Coin::class.java)!!)
+
                     }
                     Log.d("testing","{${WalletObject.wallet}}")
                 }
@@ -229,7 +230,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                 }
             }
 
-            walletReference= databaseReference.child("users").child(user.uid).child("wallet")
+            walletReference= databaseReference.child("users").child(user.uid).child("wallet").child("coinlist")
             walletReference.addValueEventListener(walletListener)
         }
     }

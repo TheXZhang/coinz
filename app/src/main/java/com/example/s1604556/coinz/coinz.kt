@@ -18,6 +18,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.widget.Toast
 import com.example.s1604556.coinz.DownloadCompleteRunner.result
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.*
 //import com.example.s1604556.coinz.R.id.toolbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -44,6 +46,9 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 
 
 import kotlinx.android.synthetic.main.activity_coinz.*
+import java.text.DateFormat
+import java.time.LocalDate
+import java.time.LocalDateTime
 
 class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,PermissionsListener {
 
@@ -51,6 +56,8 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var coinList=ArrayList<Coin>()
+    private lateinit var coinIDToday : DatabaseReference
+    private lateinit var coinIDlist: ArrayList<String>
 
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val preferencesFile = "MyPrefsFile" // for strong preferences
@@ -66,6 +73,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         setContentView(R.layout.activity_coinz)
         //setSupportActionBar(toolbar)
 
+
         getInstance(this,"pk.eyJ1IjoiczE2MDQ1NTYiLCJhIjoiY2pud2Y5ZXB4MDFhNDNxbjdueDg2YTFubCJ9.mDJ39QOCIA1DBnpFuVZC9A")
 
         mapView = findViewById(R.id.mapboxMapView)
@@ -73,7 +81,19 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
 
-        DownloadFileTask(DownloadCompleteRunner).execute("http://homepages.inf.ed.ac.uk/stg/coinz/2018/10/03/coinzmap.geojson")
+        var date=""
+        if (LocalDate.now().dayOfMonth<10) {
+            date = "${LocalDate.now().year}/${LocalDate.now().monthValue}/0${LocalDate.now().dayOfMonth}"
+            Log.d("testing", "'$date'")
+        }else{
+            date = "${LocalDate.now().year}/${LocalDate.now().monthValue}/${LocalDate.now().dayOfMonth}"
+            Log.d("testing", "'$date'")
+        }
+
+        val downloadlink = "http://homepages.inf.ed.ac.uk/stg/coinz/$date/coinzmap.geojson"
+
+        DownloadFileTask(DownloadCompleteRunner).execute(downloadlink)
+
 
 
 
@@ -85,6 +105,9 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         if (mapboxMap == null){
             Log.d(tag, "[onMapReady] mapboxMap is null")
         }else{
+
+            createCoinList()
+
             map = mapboxMap
             //set user interface options
             map?.uiSettings?.isCompassEnabled = true
@@ -92,35 +115,29 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             //make location info available
             enableLocation()
-            val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
-            val feature =fc.features()
             var ic: com.mapbox.mapboxsdk.annotations.Icon
 
-            for (item in feature!!){
-                val p=item.geometry() as Point
-                val c=LatLng(p.latitude(),p.longitude())
-                val j=item.properties()
-                val currency= j?.get("currency").toString().drop(1).dropLast(1)
-
-                val id= j?.get("id").toString().drop(1).dropLast(1)
-                val value=j?.get("value").toString().drop(1).dropLast(1)
-
-                val markerColour=j?.get("marker-color").toString()
+            val auth= FirebaseAuth.getInstance()
+            coinIDToday= FirebaseDatabase.getInstance().reference
+                    .child("users").child(auth.currentUser?.uid!!).child("CoinCollectedToday")
 
 
-                ic = when (markerColour) {
-                    "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
-                    "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
-                    "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
-
-                    else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
+            val coinLeftListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    for (d in dataSnapshot.children){
+                        coinIDlist.add(d.getValue(String::class.java)!!)
+                    }
                 }
 
-                map?.addMarker(MarkerOptions().position(c).title(id).snippet(currency+value).icon(ic))
-                coinList.add(Coin(id,currency,value,c,markerColour))
-
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
             }
 
+            coinIDToday.addValueEventListener(coinLeftListener)
 
         }
     }
@@ -275,6 +292,27 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         }
         coinList=coins
+
+    }
+
+    private fun createCoinList(){
+        val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
+        val feature =fc.features()
+
+        for (item in feature!!){
+            val p=item.geometry() as Point
+            val c=LatLng(p.latitude(),p.longitude())
+            val j=item.properties()
+            val currency= j?.get("currency").toString().drop(1).dropLast(1)
+
+            val id= j?.get("id").toString().drop(1).dropLast(1)
+            val value=j?.get("value").toString().drop(1).dropLast(1)
+
+            val markerColour=j?.get("marker-color").toString()
+
+            coinList.add(Coin(id,currency,value,c,markerColour))
+        }
+
     }
 
 
