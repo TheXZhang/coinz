@@ -56,8 +56,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
     private var coinList=ArrayList<Coin>()
-    private lateinit var coinIDToday : DatabaseReference
-    private var coinIDlist=ArrayList<String>()
 
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val preferencesFile = "MyPrefsFile" // for strong preferences
@@ -95,8 +93,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         DownloadFileTask(DownloadCompleteRunner).execute(downloadlink)
 
 
-
-
     }
 
 
@@ -108,6 +104,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             createCoinList()
 
+
             map = mapboxMap
             //set user interface options
             map?.uiSettings?.isCompassEnabled = true
@@ -115,34 +112,17 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             //make location info available
             enableLocation()
+
+
             var ic: com.mapbox.mapboxsdk.annotations.Icon
 
-            val auth= FirebaseAuth.getInstance()
-            coinIDToday= FirebaseDatabase.getInstance().reference
-                    .child("users").child(auth.currentUser?.uid!!).child("CoinCollectedToday")
-
-
-            val coinLeftListener = object : ValueEventListener {
-                override fun onDataChange(dataSnapshot: DataSnapshot) {
-                    // Get Post object and use the values to update the UI
-                    for (d in dataSnapshot.children){
-                        coinIDlist.add(d.getValue(String::class.java)!!)
-                    }
-                }
-
-                override fun onCancelled(databaseError: DatabaseError) {
-                    // Getting Post failed, log a message
-                    Toast.makeText(baseContext, "Failed to load data.",
-                            Toast.LENGTH_SHORT).show()
-                }
-            }
-
-            coinIDToday.addValueEventListener(coinLeftListener)
 
             val removelist = ArrayList<Coin>()
 
-            for (id in coinIDlist){
-                for (coin in coinList){
+
+
+            for (coin in coinList){
+                for (id in WalletObject.collectedID){
                     if (coin.id==id){
                         removelist.add(coin)
                     }

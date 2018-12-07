@@ -10,6 +10,7 @@ object WalletObject {
     var wallet=Wallet(coinlist = ArrayList(),limit=1000,currentNo = 0)
     private lateinit var walletReference : DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
+    var collectedID = ArrayList<String>()
 
 
 
@@ -21,10 +22,7 @@ object WalletObject {
             if (distance<=radius)  {
                 removelist.add(coin)
 
-                val auth= FirebaseAuth.getInstance()
-                coinIDToday= FirebaseDatabase.getInstance().reference
-                        .child("users").child(auth.currentUser?.uid!!).child("CoinCollectedToday")
-                coinIDToday.child(coin.id).setValue(coin)
+                collectedID.add(coin.id)
             }
         }
 
@@ -33,13 +31,17 @@ object WalletObject {
                 coinList.remove(coin)
                 wallet.addcoin(coin)
             }
-
         }
         val auth= FirebaseAuth.getInstance()
 
         walletReference = FirebaseDatabase.getInstance().reference
                 .child("users").child(auth.currentUser?.uid!!).child("wallet")
         walletReference.setValue(wallet)
+
+
+        coinIDToday= FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("CoinCollectedToday")
+        coinIDToday.setValue(collectedID)
 
 
 

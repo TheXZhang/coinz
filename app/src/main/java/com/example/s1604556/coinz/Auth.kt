@@ -21,6 +21,8 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     private lateinit var auth: FirebaseAuth
     private lateinit var walletReference : DatabaseReference
     private lateinit var databaseReference: DatabaseReference
+    private lateinit var coinIDToday : DatabaseReference
+    private var coinIDlist=ArrayList<String>()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,6 +35,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
         auth= FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().reference
+
 
 
     }
@@ -230,8 +233,29 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                 }
             }
 
+
+            val coinLeftListener = object : ValueEventListener {
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    WalletObject.wallet.coinlist.clear()
+                    for (d in dataSnapshot.children){
+                        WalletObject.collectedID.add(d.getValue(String::class.java)!!)
+                        Log.d("asdasd","the other coin id '${d.getValue(String::class.java)}'")
+                    }
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
+            }
+
+            coinIDToday=databaseReference.child("users").child(user.uid).child("").child("CoinCollectedToday")
+            coinIDToday.addValueEventListener(coinLeftListener)
             walletReference= databaseReference.child("users").child(user.uid).child("wallet").child("coinlist")
             walletReference.addValueEventListener(walletListener)
+
         }
     }
 
