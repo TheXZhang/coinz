@@ -57,7 +57,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private var map: MapboxMap? = null
     private var coinList=ArrayList<Coin>()
     private lateinit var coinIDToday : DatabaseReference
-    private lateinit var coinIDlist: ArrayList<String>
+    private var coinIDlist=ArrayList<String>()
 
     private var downloadDate = "" // Format: YYYY/MM/DD
     private val preferencesFile = "MyPrefsFile" // for strong preferences
@@ -138,6 +138,34 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
             }
 
             coinIDToday.addValueEventListener(coinLeftListener)
+
+            val removelist = ArrayList<Coin>()
+
+            for (id in coinIDlist){
+                for (coin in coinList){
+                    if (coin.id==id){
+                        removelist.add(coin)
+                    }
+                }
+            }
+
+            for (coin in removelist){
+                coinList.remove(coin)
+            }
+
+            for (coin in coinList){
+
+                ic = when (coin.colour) {
+                    "\"#008000\"" -> IconFactory.getInstance (this).fromResource(R.drawable.green)
+                    "\"#ffdf00\"" -> IconFactory.getInstance (this).fromResource(R.drawable.yellow)
+                    "\"#0000ff\"" -> IconFactory.getInstance (this).fromResource(R.drawable.blue)
+
+                    else -> IconFactory.getInstance (this).fromResource(R.drawable.red)
+                }
+
+                map?.addMarker(MarkerOptions().position(coin.position).title(coin.id).snippet(coin.currency+coin.value).icon(ic))
+
+            }
 
         }
     }
