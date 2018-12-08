@@ -21,6 +21,9 @@ import android.widget.Toast
 import com.example.s1604556.coinz.DownloadCompleteRunner.result
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.*
+import com.google.gson.Gson
+import com.google.gson.JsonObject
+import com.google.gson.JsonParser
 //import com.example.s1604556.coinz.R.id.toolbar
 import com.mapbox.android.core.location.LocationEngine
 import com.mapbox.android.core.location.LocationEngineListener
@@ -47,6 +50,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 
 
 import kotlinx.android.synthetic.main.activity_coinz.*
+import org.xml.sax.Parser
+
 import java.text.DateFormat
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -257,7 +262,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 collect.isClickable=false
                 Handler().postDelayed({
                     collect.isClickable=true
-                },2000)
+                },500)
 
             }else{
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
@@ -265,7 +270,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 collect.isClickable=false
                 Handler().postDelayed({
                     collect.isClickable=true
-                },3000)
+                },500)
 
                 renewMap(newlist)
             }
@@ -323,6 +328,15 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private fun createCoinList(){
         val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
         val feature =fc.features()
+
+        val parser = JsonParser()
+        val jobject=parser.parse(DownloadCompleteRunner.result) as JsonObject
+        val ratelist =jobject.get("rates") as JsonObject
+        val rate=ratelist.get("QUID")
+        Log.d("rate","the rate is $rate")
+
+
+
 
         for (item in feature!!){
             val p=item.geometry() as Point

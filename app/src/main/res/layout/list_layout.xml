@@ -9,7 +9,7 @@
     <android.support.constraint.ConstraintLayout
         android:id="@+id/cardView"
         android:layout_width="0dp"
-        android:layout_height="74dp"
+        android:layout_height="141dp"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.6"
@@ -20,7 +20,7 @@
 
         <TextView
             android:id="@+id/textViewCurrency"
-            android:layout_width="98dp"
+            android:layout_width="0dp"
             android:layout_height="38dp"
             android:padding="5dp"
             android:text="Currency"
@@ -34,8 +34,8 @@
 
         <TextView
             android:id="@+id/textViewValue"
-            android:layout_width="59dp"
-            android:layout_height="35dp"
+            android:layout_width="0dp"
+            android:layout_height="37dp"
             android:padding="5dp"
             android:text="Value"
             android:textAppearance="@style/Base.TextAppearance.AppCompat.Medium"
@@ -44,7 +44,7 @@
             app:layout_constraintHorizontal_bias="0.0"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="0.365" />
 
         <Button
             android:id="@+id/toFriend"
@@ -53,10 +53,10 @@
             android:text="To Friend"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintHorizontal_bias="1.0"
+            app:layout_constraintHorizontal_bias="0.805"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="0.849" />
 
         <Button
             android:id="@+id/toBank"
@@ -65,10 +65,10 @@
             android:text="To Bank"
             app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="@+id/toFriend"
-            app:layout_constraintHorizontal_bias="0.648"
+            app:layout_constraintHorizontal_bias="0.198"
             app:layout_constraintStart_toStartOf="@+id/textViewValue"
             app:layout_constraintTop_toTopOf="parent"
-            app:layout_constraintVertical_bias="1.0" />
+            app:layout_constraintVertical_bias="0.849" />
 
 
     </android.support.constraint.ConstraintLayout>

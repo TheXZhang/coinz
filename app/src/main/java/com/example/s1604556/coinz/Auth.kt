@@ -250,7 +250,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                         WalletObject.wallet.coinlist.add(dataSS.getValue(Coin::class.java)!!)
 
                     }
-                    Log.d("testing","{${WalletObject.wallet}}")
+                    Log.d("testing","${WalletObject.wallet}")
                     loading = true
                 }
 
