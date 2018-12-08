@@ -1,13 +1,18 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.walletadapters
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Button
 import android.widget.TextView
+import com.example.s1604556.coinz.activitypage.Coin
+import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.bank.BankObject
+import com.example.s1604556.coinz.wallet.WalletObject
 
-class ShilAdapter(val coins: ArrayList<Coin>) :
-        RecyclerView.Adapter<ShilAdapter.ViewHolder>() {
+class PennyAdapter(val coins: ArrayList<Coin>) :
+        RecyclerView.Adapter<PennyAdapter.ViewHolder>() {
 
     // Provide a reference to the views for each data item
     // Complex data items may need more than one view per item, and
@@ -20,7 +25,7 @@ class ShilAdapter(val coins: ArrayList<Coin>) :
 
 
     // Create new views (invoked by the layout manager)
-    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ShilAdapter.ViewHolder {
+    override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         // create a new view
         val layoutInflater = LayoutInflater.from(parent.context)
         val cellForRow=layoutInflater.inflate(R.layout.list_layout, parent, false)
@@ -30,14 +35,25 @@ class ShilAdapter(val coins: ArrayList<Coin>) :
 
     // Replace the contents of a view (invoked by the layout manager)
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        // - get element from your dataset at this position
-        // - replace the contents of the view with that element
+        val currentCoin = coins.get(position)
         holder.bindItems(coins[position])
+        val button =holder.itemView.findViewById(R.id.toBank) as Button
+        button.setOnClickListener{
+            removeitem(currentCoin)
+        }
 
     }
 
     // Return the size of your dataset (invoked by the layout manager)
 
+    private fun removeitem(coin: Coin) {
+        val position=coins.indexOf(coin)
+        coins.removeAt(position)
+        notifyItemRemoved(position)
+        WalletObject.wallet.coinlist.remove(coin)
+        BankObject.bank.coinlist.add(coin)
+
+    }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         fun bindItems(coin: Coin) {

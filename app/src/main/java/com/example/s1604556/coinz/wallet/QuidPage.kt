@@ -1,9 +1,15 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.wallet
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import com.example.s1604556.coinz.activitypage.Coin
+import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.bank.BankObject
+import com.example.s1604556.coinz.walletadapters.QuidAdapter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
 class QuidPage : AppCompatActivity(){
     private lateinit var recyclerView: RecyclerView
@@ -39,5 +45,19 @@ class QuidPage : AppCompatActivity(){
             adapter = viewAdapter
 
         }
+    }
+    override fun onStop() {
+        super.onStop()
+
+        val auth = FirebaseAuth.getInstance()
+        val walletReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("wallet")
+        walletReference.setValue(WalletObject.wallet)
+        val bankReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("bank")
+        bankReference.setValue(BankObject.bank)
+
+
+
     }
 }

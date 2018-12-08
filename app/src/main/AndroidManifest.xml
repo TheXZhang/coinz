@@ -15,7 +15,7 @@
         android:theme="@style/AppTheme">
 
         <activity
-            android:name=".Auth"
+            android:name=".activitypage.Auth"
             android:label="@string/app_name"
             android:theme="@style/AppTheme.NoActionBar">
             <intent-filter>
@@ -24,13 +24,17 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".coinz" />
-        <activity android:name=".Bankscreen" />
-        <activity android:name=".WalletScreen" />
-        <activity android:name=".QuidPage" />
-        <activity android:name=".PennyPage" />
-        <activity android:name=".ShilPage" />
-        <activity android:name=".DollarPage" />
+        <activity android:name=".activitypage.coinz" />
+        <activity android:name=".bank.Bankscreen" />
+        <activity android:name=".wallet.WalletScreen" />
+        <activity android:name=".wallet.QuidPage" />
+        <activity android:name=".wallet.PennyPage" />
+        <activity android:name=".wallet.ShilPage" />
+        <activity android:name=".wallet.DollarPage" />
+        <activity android:name=".bank.BankDollarPage" />
+        <activity android:name=".bank.BankPennyPage" />
+        <activity android:name=".bank.BankQuidPage" />
+        <activity android:name=".bank.BankShilPage" />
     </application>
 
 </manifest>

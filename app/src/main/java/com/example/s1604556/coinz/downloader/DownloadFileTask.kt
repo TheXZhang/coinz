@@ -1,8 +1,7 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.downloader
 
 import android.os.AsyncTask
-import android.util.Log
-import com.example.s1604556.coinz.DownloadCompleteRunner.result
+import com.example.s1604556.coinz.downloader.DownloadCompleteRunner.result
 import java.io.IOException
 import java.io.InputStream
 import java.net.HttpURLConnection

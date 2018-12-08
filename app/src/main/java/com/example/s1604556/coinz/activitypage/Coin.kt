@@ -1,4 +1,4 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.activitypage
 
 import com.mapbox.mapboxsdk.geometry.LatLng
 

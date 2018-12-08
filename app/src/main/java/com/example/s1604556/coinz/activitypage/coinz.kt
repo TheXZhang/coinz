@@ -1,27 +1,19 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.activitypage
 
-import android.content.Context
 import android.content.Intent
-import android.content.pm.FeatureGroupInfo
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
-import android.graphics.drawable.BitmapDrawable
-import android.graphics.drawable.Icon
 import android.location.Location
 import android.os.Bundle
 import android.os.Handler
-import android.support.design.widget.Snackbar
-import android.support.v4.content.res.ResourcesCompat
-import android.support.v4.graphics.drawable.DrawableCompat
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.Menu
-import android.view.MenuItem
 import android.widget.Toast
-import com.example.s1604556.coinz.DownloadCompleteRunner.result
-import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.database.*
-import com.google.gson.Gson
+import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.bank.BankObject
+import com.example.s1604556.coinz.bank.Bankscreen
+import com.example.s1604556.coinz.downloader.DownloadCompleteRunner
+import com.example.s1604556.coinz.downloader.DownloadFileTask
+import com.example.s1604556.coinz.wallet.WalletObject
+import com.example.s1604556.coinz.wallet.WalletScreen
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 //import com.example.s1604556.coinz.R.id.toolbar
@@ -31,14 +23,11 @@ import com.mapbox.android.core.location.LocationEnginePriority
 import com.mapbox.android.core.location.LocationEngineProvider
 import com.mapbox.android.core.permissions.PermissionsListener
 import com.mapbox.android.core.permissions.PermissionsManager
-import com.mapbox.geojson.Feature
 import com.mapbox.geojson.FeatureCollection
 import com.mapbox.geojson.Point
-import com.mapbox.mapboxsdk.Mapbox
 import com.mapbox.mapboxsdk.Mapbox.getInstance
 import com.mapbox.mapboxsdk.annotations.IconFactory
 import com.mapbox.mapboxsdk.annotations.MarkerOptions
-import com.mapbox.mapboxsdk.camera.CameraUpdate
 import com.mapbox.mapboxsdk.camera.CameraUpdateFactory
 import com.mapbox.mapboxsdk.geometry.LatLng
 import com.mapbox.mapboxsdk.maps.MapView
@@ -50,11 +39,8 @@ import com.mapbox.mapboxsdk.maps.OnMapReadyCallback
 
 
 import kotlinx.android.synthetic.main.activity_coinz.*
-import org.xml.sax.Parser
 
-import java.text.DateFormat
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,PermissionsListener {
 
@@ -266,19 +252,23 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             }else{
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
-                val newlist=WalletObject.collectingCoins(playerposition,coinList)
+                val newlist= WalletObject.collectingCoins(playerposition,coinList)
                 collect.isClickable=false
                 Handler().postDelayed({
                     collect.isClickable=true
                 },500)
 
-                renewMap(newlist)
+                if(newlist.isEmpty()) {
+                    Toast.makeText(this@coinz, "Your have reached your wallet limit, considering update the limit", Toast.LENGTH_SHORT).show()
+                }else{
+                    renewMap(newlist)
+                }
             }
 
         }
 
         wallet.setOnClickListener{
-            val intent = Intent(this,WalletScreen::class.java)
+            val intent = Intent(this, WalletScreen::class.java)
             startActivity(intent)
             wallet.isClickable=false
             Handler().postDelayed({
@@ -287,7 +277,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
 
         bank.setOnClickListener{
-            val intent = Intent(this,Bankscreen::class.java)
+            val intent = Intent(this, Bankscreen::class.java)
             startActivity(intent)
             bank.isClickable=false
             Handler().postDelayed({
@@ -295,11 +285,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
             },2000)
 
         }
-        //val settings = getSharedPreferences(preferencesFile, Context.MODE_PRIVATE)
-
-        //downloadDate = settings.getString("lastDownloadDate","")
-
-        //Log.d(tag, "[onStart] recalled lastDownloadDate is '$downloadDate'")
 
     }
 
@@ -332,10 +317,10 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         val parser = JsonParser()
         val jobject=parser.parse(DownloadCompleteRunner.result) as JsonObject
         val ratelist =jobject.get("rates") as JsonObject
-        val rate=ratelist.get("QUID")
-        Log.d("rate","the rate is $rate")
-
-
+        BankObject.quidRate= ratelist.get("QUID").toString().toDouble()
+        BankObject.dollarRate=ratelist.get("DOLR").toString().toDouble()
+        BankObject.penyRate=ratelist.get("PENY").toString().toDouble()
+        BankObject.shilRate=ratelist.get("SHIL").toString().toDouble()
 
 
         for (item in feature!!){
@@ -349,7 +334,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
             val markerColour=j?.get("marker-color").toString()
 
-            coinList.add(Coin(id,currency,value,c,markerColour))
+            coinList.add(Coin(id, currency, value, c, markerColour))
         }
 
     }

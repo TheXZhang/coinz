@@ -1,4 +1,4 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.activitypage
 
 import android.content.Intent
 import android.os.Bundle
@@ -8,14 +8,15 @@ import android.text.TextUtils
 import android.util.Log
 import android.view.View
 import android.widget.Toast
+import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.bank.BankObject
+import com.example.s1604556.coinz.wallet.WalletObject
 import com.google.firebase.auth.FirebaseAuth
-import com.google.firebase.auth.FirebaseAuthSettings
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
 
 
 import kotlinx.android.synthetic.main.auth_activity.*
-import java.time.LocalDate
 
 class Auth : AppCompatActivity(), View.OnClickListener{
 
@@ -23,6 +24,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     private lateinit var walletReference : DatabaseReference
     private lateinit var databaseReference: DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
+    private lateinit var bankReference : DatabaseReference
     private var coinIDlist=ArrayList<String>()
     private var loading=false
 
@@ -245,10 +247,19 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                 override fun onDataChange(dataSnapshot: DataSnapshot) {
                     // Get Post object and use the values to update the UI
                     WalletObject.wallet.coinlist.clear()
+                    WalletObject.wallet.currentNo=0
+                    WalletObject.wallet.limit=150
 
-                    for (dataSS in dataSnapshot.children){
+                    for (dataSS in dataSnapshot.child("coinlist").children){
                         WalletObject.wallet.coinlist.add(dataSS.getValue(Coin::class.java)!!)
 
+                    }
+                    if(dataSnapshot.child("currentNo").getValue(Int::class.java)!=null){
+                        WalletObject.wallet.currentNo=dataSnapshot.child("currentNo").getValue(Int::class.java)!!
+                    }
+
+                    if (dataSnapshot.child("limit").getValue(Int::class.java)!=null) {
+                        WalletObject.wallet.limit = dataSnapshot.child("limit").getValue(Int::class.java)!!
                     }
                     Log.d("testing","${WalletObject.wallet}")
                     loading = true
@@ -269,7 +280,28 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                     WalletObject.collectedID.clear()
                     for (d in dataSnapshot.children){
                         WalletObject.collectedID.add(d.getValue(String::class.java)!!)
-                        Log.d("asdasd","the other coin id '${d.getValue(String::class.java)}'")
+                    }
+                    loading = true
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+            val bankListener=object : ValueEventListener{
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    BankObject.bank.coinlist.clear()
+                    BankObject.bank.gold=0.0
+                    for (d in dataSnapshot.child("coinlist").children){
+                        BankObject.bank.coinlist.add(d.getValue(Coin::class.java)!!)
+                    }
+                    if (dataSnapshot.child("gold").getValue(Int::class.java)!=null) {
+                        BankObject.bank.gold = dataSnapshot.child("gold").getValue(Double::class.java)!!
                     }
                     loading = true
                 }
@@ -284,8 +316,10 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
             coinIDToday=databaseReference.child("users").child(user.uid).child("").child("CoinCollectedToday")
             coinIDToday.addValueEventListener(coinLeftListener)
-            walletReference= databaseReference.child("users").child(user.uid).child("wallet").child("coinlist")
+            walletReference= databaseReference.child("users").child(user.uid).child("wallet")
             walletReference.addValueEventListener(walletListener)
+            bankReference=databaseReference.child("users").child(user.uid).child("bank")
+            bankReference.addValueEventListener(bankListener)
 
 
         }

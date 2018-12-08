@@ -1,11 +1,17 @@
-package com.example.s1604556.coinz
+package com.example.s1604556.coinz.wallet
 
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import com.example.s1604556.coinz.activitypage.Coin
+import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.bank.BankObject
+import com.example.s1604556.coinz.walletadapters.ShilAdapter
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 
-class PennyPage : AppCompatActivity() {
+class ShilPage : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
     private lateinit var viewManager: RecyclerView.LayoutManager
@@ -20,11 +26,11 @@ class PennyPage : AppCompatActivity() {
 
 
         for (coin in WalletObject.wallet.coinlist){
-            if (coin.currency=="PENY")
+            if (coin.currency=="SHIL")
                 showList.add(coin)
         }
 
-        viewAdapter = PennyAdapter(showList)
+        viewAdapter = ShilAdapter(showList)
 
 
         recyclerView = findViewById<RecyclerView>(R.id.wallet_recycler_view).apply {
@@ -39,5 +45,19 @@ class PennyPage : AppCompatActivity() {
             adapter = viewAdapter
 
         }
+    }
+    override fun onStop() {
+        super.onStop()
+
+        val auth = FirebaseAuth.getInstance()
+        val walletReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("wallet")
+        walletReference.setValue(WalletObject.wallet)
+        val bankReference = FirebaseDatabase.getInstance().reference
+                .child("users").child(auth.currentUser?.uid!!).child("bank")
+        bankReference.setValue(BankObject.bank)
+
+
+
     }
 }
