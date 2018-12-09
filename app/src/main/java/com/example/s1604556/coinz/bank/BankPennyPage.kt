@@ -21,7 +21,7 @@ class BankPennyPage : AppCompatActivity() {
         setContentView(R.layout.bank_recycler_view)
 
         whichrate.text = "The Penny rate today is"
-        whatrate.text="1 Penny to "+BankObject.dollarRate.toString()+" Gold"
+        whatrate.text="1 Penny to "+BankObject.penyRate.toString()+" Gold"
         val showList = ArrayList<Coin>()
 
         viewManager = LinearLayoutManager(this)

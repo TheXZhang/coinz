@@ -37,7 +37,7 @@ class BankPennyAdapter(val coins: ArrayList<Coin>) :
         val currentCoin = coins.get(position)
 
         holder.bindItems(coins[position])
-        val button =holder.itemView.findViewById(R.id.toFriend) as Button
+        val button =holder.itemView.findViewById(R.id.toGold) as Button
         button.setOnClickListener{
             removeitem(currentCoin)
         }

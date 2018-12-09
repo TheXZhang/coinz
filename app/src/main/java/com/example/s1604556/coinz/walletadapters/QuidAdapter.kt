@@ -1,15 +1,23 @@
 package com.example.s1604556.coinz.walletadapters
 
+import android.content.Context
 import android.support.v7.widget.RecyclerView
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
+import android.widget.EditText
 import android.widget.TextView
+import android.widget.Toast
 import com.example.s1604556.coinz.activitypage.Coin
 import com.example.s1604556.coinz.R
 import com.example.s1604556.coinz.bank.BankObject
 import com.example.s1604556.coinz.wallet.WalletObject
+import com.google.firebase.database.DataSnapshot
+import com.google.firebase.database.DatabaseError
+import com.google.firebase.database.FirebaseDatabase
+import com.google.firebase.database.ValueEventListener
 
 class QuidAdapter(val coins: ArrayList<Coin>) :
         RecyclerView.Adapter<QuidAdapter.ViewHolder>() {
@@ -41,6 +49,50 @@ class QuidAdapter(val coins: ArrayList<Coin>) :
         button.setOnClickListener{
             removeitem(currentCoin)
         }
+        val sendbutton =holder.itemView.findViewById(R.id.toFriend) as Button
+
+        sendbutton.setOnClickListener{
+            val targetEmail = holder.itemView.findViewById(R.id.targetEmail) as EditText
+            Log.d("sometest","${targetEmail.text}")
+            val context =holder.itemView.context
+            sendcoin(currentCoin,targetEmail.text.toString(),context)
+
+        }
+
+    }
+    private fun sendcoin(coin:Coin,email:String, context: Context){
+        var targetUid: String
+
+
+        val friendlistener=object : ValueEventListener {
+            override fun onDataChange(dataSnapshot: DataSnapshot) {
+                // Get Post object and use the values to update the UI
+                for (d in dataSnapshot.children){
+                    if(d.child("Email").getValue(String::class.java)==email){
+                        targetUid= d.ref.key!!
+                        val limit=d.child("wallet").child("limit").getValue(Int::class.java)
+                        val currentNo =d.child("wallet").child("currentNo").getValue(Int::class.java)
+                        val playerReference = FirebaseDatabase.getInstance().reference.child("users").child(targetUid).child("wallet")
+                        if(currentNo!! < limit!!) {
+                            playerReference.child("coinlist").child(coin.id).setValue(coin)
+                            val position=coins.indexOf(coin)
+                            coins.removeAt(position)
+                            notifyItemRemoved(position)
+                            WalletObject.wallet.coinlist.remove(coin)
+                        }else{
+                            Toast.makeText(context,"The player's wallet limit has reached", Toast.LENGTH_SHORT).show()
+                        }
+                    }
+                }
+
+            }
+
+            override fun onCancelled(databaseError: DatabaseError) {}
+        }
+
+        FirebaseDatabase.getInstance().reference.child("users").addListenerForSingleValueEvent(friendlistener)
+
+
 
     }
 

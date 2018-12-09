@@ -21,7 +21,7 @@ class BankShilPage : AppCompatActivity() {
         setContentView(R.layout.bank_recycler_view)
 
         whichrate.text = "The Shil rate today is"
-        whatrate.text="1 Shil to "+BankObject.dollarRate.toString()+" Gold"
+        whatrate.text="1 Shil to "+BankObject.shilRate.toString()+" Gold"
 
         val showList = ArrayList<Coin>()
 

@@ -255,7 +255,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
                     }
                     if(dataSnapshot.child("currentNo").getValue(Int::class.java)!=null){
-                        WalletObject.wallet.currentNo=dataSnapshot.child("currentNo").getValue(Int::class.java)!!
+                        WalletObject.wallet.currentNo=WalletObject.wallet.coinlist.size
                     }
 
                     if (dataSnapshot.child("limit").getValue(Int::class.java)!=null) {
@@ -314,7 +314,7 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
             }
 
-            coinIDToday=databaseReference.child("users").child(user.uid).child("").child("CoinCollectedToday")
+            coinIDToday=databaseReference.child("users").child(user.uid).child("CoinCollectedToday")
             coinIDToday.addValueEventListener(coinLeftListener)
             walletReference= databaseReference.child("users").child(user.uid).child("wallet")
             walletReference.addValueEventListener(walletListener)

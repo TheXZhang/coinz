@@ -21,7 +21,7 @@ class BankQuidPage : AppCompatActivity() {
         setContentView(R.layout.bank_recycler_view)
 
         whichrate.text = "The Quid rate today is"
-        whatrate.text="1 Quid to "+BankObject.dollarRate.toString()+" Gold"
+        whatrate.text="1 Quid to "+BankObject.quidRate.toString()+" Gold"
 
         val showList = ArrayList<Coin>()
 
