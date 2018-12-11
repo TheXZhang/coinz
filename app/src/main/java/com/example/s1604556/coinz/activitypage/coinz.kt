@@ -12,8 +12,11 @@ import com.example.s1604556.coinz.bank.BankObject
 import com.example.s1604556.coinz.bank.Bankscreen
 import com.example.s1604556.coinz.downloader.DownloadCompleteRunner
 import com.example.s1604556.coinz.downloader.DownloadFileTask
+import com.example.s1604556.coinz.wallet.Wallet
 import com.example.s1604556.coinz.wallet.WalletObject
 import com.example.s1604556.coinz.wallet.WalletScreen
+import com.google.firebase.auth.FirebaseAuth
+import com.google.firebase.database.FirebaseDatabase
 import com.google.gson.JsonObject
 import com.google.gson.JsonParser
 //import com.example.s1604556.coinz.R.id.toolbar
@@ -49,8 +52,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private var map: MapboxMap? = null
     private var coinList=ArrayList<Coin>()
 
-    private var downloadDate = "" // Format: YYYY/MM/DD
-    private val preferencesFile = "MyPrefsFile" // for strong preferences
 
     private lateinit var originLocation : Location
     private lateinit var permissionsManager : PermissionsManager
@@ -207,6 +208,13 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }else{
             originLocation = location
             setCameraPosition(originLocation)
+            val prevLatLng=LatLng(originLocation.latitude,originLocation.longitude)
+            val currentLatLng=LatLng(location.latitude,location.longitude)
+            val auth = FirebaseAuth.getInstance()
+            WalletObject.Distance=WalletObject.Distance+(prevLatLng.distanceTo(currentLatLng))
+            val distance = FirebaseDatabase.getInstance().reference
+                    .child("users").child(auth.currentUser?.uid!!).child("distanceTravelled")
+            distance.setValue(WalletObject.Distance)
             _initializing= true                                     //making sure initialising is successful, so that button press does not crash the app
         }
     }
@@ -258,8 +266,9 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                     collect.isClickable=true
                 },500)
 
-                if(newlist.isEmpty()) {
+                if(WalletObject.wallet.currentNo==WalletObject.wallet.limit) {
                     Toast.makeText(this@coinz, "Your have reached your wallet limit, considering update the limit", Toast.LENGTH_SHORT).show()
+                    renewMap(newlist)
                 }else{
                     renewMap(newlist)
                 }

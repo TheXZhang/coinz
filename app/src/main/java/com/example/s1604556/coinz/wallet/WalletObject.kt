@@ -11,6 +11,7 @@ object WalletObject {
     private lateinit var walletReference : DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
     var collectedID = ArrayList<String>()
+    var Distance=0.0
 
 
 
