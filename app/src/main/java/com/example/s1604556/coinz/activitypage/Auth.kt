@@ -3,6 +3,7 @@ package com.example.s1604556.coinz.activitypage
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
+import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
@@ -17,6 +18,7 @@ import com.google.firebase.database.*
 
 
 import kotlinx.android.synthetic.main.auth_activity.*
+import java.time.LocalTime
 
 class Auth : AppCompatActivity(), View.OnClickListener{
 
@@ -25,6 +27,8 @@ class Auth : AppCompatActivity(), View.OnClickListener{
     private lateinit var databaseReference: DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
     private lateinit var bankReference : DatabaseReference
+    private lateinit var distanceTravelled: DatabaseReference
+    private lateinit var rewardClaimed: DatabaseReference
     private var coinIDlist=ArrayList<String>()
     private var loading=false
 
@@ -39,6 +43,9 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
         auth= FirebaseAuth.getInstance()
         databaseReference = FirebaseDatabase.getInstance().reference
+        val current = LocalTime.now()
+
+        Log.d("times","${current.minute}")
 
 
 
@@ -112,13 +119,13 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                                 Toast.LENGTH_SHORT).show()
                         val user = auth.currentUser
                         updateUI(user)
+                        retrive()
                     } else {
                         // If sign in fails, display a message to the user.
                         Log.w(TAG, "signInWithEmail:failure", task.exception)
                         Toast.makeText(baseContext, "Wrong email or password.",
                                 Toast.LENGTH_SHORT).show()
                         updateUI(null)
-                        retrive()
                     }
 
                     // [START_EXCLUDE]
@@ -297,12 +304,75 @@ class Auth : AppCompatActivity(), View.OnClickListener{
                     // Get Post object and use the values to update the UI
                     BankObject.bank.coinlist.clear()
                     BankObject.bank.gold=0.0
+                    BankObject.depositedToday=0
                     for (d in dataSnapshot.child("coinlist").children){
                         BankObject.bank.coinlist.add(d.getValue(Coin::class.java)!!)
                     }
                     if (dataSnapshot.child("gold").getValue(Int::class.java)!=null) {
                         BankObject.bank.gold = dataSnapshot.child("gold").getValue(Double::class.java)!!
                     }
+
+                    if(dataSnapshot.child("dailyDeposit").getValue(Int::class.java)!=null){
+                        val current = LocalTime.now()
+                        if(current.hour==0 && current.minute==0){
+                            BankObject.depositedToday=0
+                        }else {
+                            BankObject.depositedToday = dataSnapshot.child("dailyDeposit").getValue(Int::class.java)!!
+                        }
+                    }
+                    loading = true
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+            val distanceListener=object : ValueEventListener{
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    WalletObject.Distance=0.0
+
+                    if (dataSnapshot.getValue(Double::class.java)!=null) {
+                        WalletObject.Distance = dataSnapshot.getValue(Double::class.java)!!
+                    }
+                    loading = true
+                }
+
+                override fun onCancelled(databaseError: DatabaseError) {
+                    // Getting Post failed, log a message
+                    Toast.makeText(baseContext, "Failed to load data.",
+                            Toast.LENGTH_SHORT).show()
+                }
+
+            }
+
+            val rewardListener=object : ValueEventListener{
+                override fun onDataChange(dataSnapshot: DataSnapshot) {
+                    // Get Post object and use the values to update the UI
+                    WalletObject.claim1=false
+                    WalletObject.claim2=false
+                    WalletObject.claim3=false
+                    WalletObject.claim4=false
+
+                    if(dataSnapshot.child("claim1").getValue(Boolean::class.java)!=null) {
+                        WalletObject.claim1 = dataSnapshot.child("claim1").getValue(Boolean::class.java)!!
+                    }
+                    if(dataSnapshot.child("claim2").getValue(Boolean::class.java)!=null) {
+                        WalletObject.claim2 = dataSnapshot.child("claim2").getValue(Boolean::class.java)!!
+                    }
+
+                    if(dataSnapshot.child("claim3").getValue(Boolean::class.java)!=null) {
+                        WalletObject.claim3 = dataSnapshot.child("claim3").getValue(Boolean::class.java)!!
+                    }
+
+                    if(dataSnapshot.child("claim4").getValue(Boolean::class.java)!=null) {
+                        WalletObject.claim4 = dataSnapshot.child("claim4").getValue(Boolean::class.java)!!
+                    }
+
                     loading = true
                 }
 
@@ -316,10 +386,18 @@ class Auth : AppCompatActivity(), View.OnClickListener{
 
             coinIDToday=databaseReference.child("users").child(user.uid).child("CoinCollectedToday")
             coinIDToday.addValueEventListener(coinLeftListener)
+
             walletReference= databaseReference.child("users").child(user.uid).child("wallet")
             walletReference.addValueEventListener(walletListener)
+
             bankReference=databaseReference.child("users").child(user.uid).child("bank")
             bankReference.addValueEventListener(bankListener)
+
+            distanceTravelled=databaseReference.child("users").child(user.uid).child("distanceTravelled")
+            distanceTravelled.addValueEventListener(distanceListener)
+
+            rewardClaimed=databaseReference.child("users").child(user.uid).child("achievementClaimed")
+            rewardClaimed.addValueEventListener(rewardListener)
 
 
         }

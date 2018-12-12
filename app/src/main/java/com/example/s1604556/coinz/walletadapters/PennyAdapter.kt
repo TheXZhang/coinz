@@ -1,6 +1,7 @@
 package com.example.s1604556.coinz.walletadapters
 
 import android.content.Context
+import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.util.Log
 import android.view.LayoutInflater
@@ -49,11 +50,25 @@ class PennyAdapter(val coins: ArrayList<Coin>) :
         holder.bindItems(coins[position])
         val button =holder.itemView.findViewById(R.id.toBank) as Button
         button.setOnClickListener{
-            removeitem(currentCoin)
+            button.isClickable=false
+            Handler().postDelayed({
+                button.isClickable=true
+            },2000)
+            if(BankObject.depositedToday<25){
+                removeitem(currentCoin)
+                BankObject.depositedToday=BankObject.depositedToday+1
+            }else{
+                val context =holder.itemView.context
+                Toast.makeText(context,"You have reached your 25 coins daily deposit limit", Toast.LENGTH_SHORT).show()
+            }
         }
         val sendbutton =holder.itemView.findViewById(R.id.toFriend) as Button
 
         sendbutton.setOnClickListener{
+            sendbutton.isClickable=false
+            Handler().postDelayed({
+                sendbutton.isClickable=true
+            },2000)
             val targetEmail = holder.itemView.findViewById(R.id.targetEmail) as EditText
             Log.d("sometest","${targetEmail.text}")
             val context =holder.itemView.context

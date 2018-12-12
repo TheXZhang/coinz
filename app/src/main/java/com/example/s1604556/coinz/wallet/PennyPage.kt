@@ -56,6 +56,7 @@ class PennyPage : AppCompatActivity() {
         val bankReference = FirebaseDatabase.getInstance().reference
                 .child("users").child(auth.currentUser?.uid!!).child("bank")
         bankReference.setValue(BankObject.bank)
+        bankReference.child("dailyDeposit").setValue(BankObject.depositedToday)
 
 
 

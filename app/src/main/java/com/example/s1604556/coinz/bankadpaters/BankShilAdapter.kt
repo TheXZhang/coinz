@@ -1,5 +1,6 @@
 package com.example.s1604556.coinz.bankadpaters
 
+import android.os.Handler
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
@@ -39,6 +40,10 @@ class BankShilAdapter(val coins: ArrayList<Coin>) :
         holder.bindItems(coins[position])
         val button =holder.itemView.findViewById(R.id.toGold) as Button
         button.setOnClickListener{
+            button.isClickable=false
+            Handler().postDelayed({
+                button.isClickable=true
+            },2000)
             removeitem(currentCoin)
         }
 

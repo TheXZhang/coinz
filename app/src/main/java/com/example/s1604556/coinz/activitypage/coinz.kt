@@ -206,16 +206,22 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         if (location == null){
             Log.d(tag,"[onLocationChanged] location is null")
         }else{
-            originLocation = location
-            setCameraPosition(originLocation)
-            val prevLatLng=LatLng(originLocation.latitude,originLocation.longitude)
-            val currentLatLng=LatLng(location.latitude,location.longitude)
-            val auth = FirebaseAuth.getInstance()
-            WalletObject.Distance=WalletObject.Distance+(prevLatLng.distanceTo(currentLatLng))
-            val distance = FirebaseDatabase.getInstance().reference
-                    .child("users").child(auth.currentUser?.uid!!).child("distanceTravelled")
-            distance.setValue(WalletObject.Distance)
-            _initializing= true                                     //making sure initialising is successful, so that button press does not crash the app
+            if(::originLocation.isInitialized){
+                val prevLatLng=LatLng(originLocation.latitude,originLocation.longitude)
+                val currentLatLng=LatLng(location.latitude,location.longitude)
+                val auth = FirebaseAuth.getInstance()
+                WalletObject.Distance=WalletObject.Distance+(prevLatLng.distanceTo(currentLatLng))
+                val distance = FirebaseDatabase.getInstance().reference
+                        .child("users").child(auth.currentUser?.uid!!).child("distanceTravelled")
+                distance.setValue(WalletObject.Distance)
+                originLocation = location
+                setCameraPosition(originLocation)
+                _initializing= true
+            }else {
+                originLocation = location
+                setCameraPosition(originLocation)
+                _initializing = true                                     //making sure initialising is successful, so that button press does not crash the app
+            }
         }
     }
 
@@ -251,7 +257,6 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         collect.setOnClickListener {
             if (!_initializing) {
-                //Snackbar.make(view, "Please wait while locate your position", Snackbar.LENGTH_LONG).setAction("Action", null).show()
                 Toast.makeText(this@coinz, "Please wait while locate your position", Toast.LENGTH_SHORT).show()
                 collect.isClickable=false
                 Handler().postDelayed({
@@ -293,6 +298,15 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 bank.isClickable=true
             },2000)
 
+        }
+
+        achievement.setOnClickListener{
+            val intent = Intent(this, Achievement::class.java)
+            startActivity(intent)
+            achievement.isClickable=false
+            Handler().postDelayed({
+                bank.isClickable=true
+            },2000)
         }
 
     }

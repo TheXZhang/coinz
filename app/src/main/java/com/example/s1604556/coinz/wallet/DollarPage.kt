@@ -7,9 +7,11 @@ import android.support.v7.widget.RecyclerView
 import com.example.s1604556.coinz.bank.BankObject
 import com.example.s1604556.coinz.activitypage.Coin
 import com.example.s1604556.coinz.R
+import com.example.s1604556.coinz.activitypage.Bank
 import com.example.s1604556.coinz.walletadapters.DollarAdapter
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
+import kotlinx.android.synthetic.main.activity_coinz.*
 
 
 class DollarPage : AppCompatActivity() {
@@ -60,7 +62,7 @@ class DollarPage : AppCompatActivity() {
         val bankReference = FirebaseDatabase.getInstance().reference
                 .child("users").child(auth.currentUser?.uid!!).child("bank")
         bankReference.setValue(BankObject.bank)
-
+        bankReference.child("dailyDeposit").setValue(BankObject.depositedToday)
 
 
     }

@@ -9,6 +9,7 @@ object BankObject{
     var shilRate  =0.0
     var penyRate =0.0
     var quidRate =0.0
+    var depositedToday =0
 
     fun convertGold(coin: Coin){
         val currency = coin.currency

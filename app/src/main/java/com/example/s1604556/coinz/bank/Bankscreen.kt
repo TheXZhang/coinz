@@ -12,6 +12,7 @@ class Bankscreen : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.bank_activity)
+        displayGold.text = BankObject.bank.gold.toString()
     }
     fun bank_dollar(view: View){
         view.isClickable=false
