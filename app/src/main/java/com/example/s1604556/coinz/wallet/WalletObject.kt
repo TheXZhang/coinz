@@ -53,7 +53,7 @@ object WalletObject {
                         .child("users").child(auth.currentUser?.uid!!).child("CoinCollectedToday")
                 coinIDToday.setValue(collectedID)
             } else {
-                return ArrayList()
+                return coinList
                 //return a coinlist for updating map
             }
 
