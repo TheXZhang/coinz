@@ -34,10 +34,6 @@ class coinzTest {
     var mGrantPermissionRule =
             GrantPermissionRule.grant(
                     "android.permission.ACCESS_FINE_LOCATION")
-    @Before
-    fun beforeTest(){
-        resetDatabase()
-    }
 
     @Test
     fun coinzTest() {
