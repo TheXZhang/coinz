@@ -11,7 +11,8 @@ import com.example.s1604556.coinz.bank.BankObject
 import com.example.s1604556.coinz.activitypage.Coin
 import com.example.s1604556.coinz.R
 
-
+//the following code will be exactly the same as in all other adapter pages for bank, with very slight differences will not repeat unnecessary comment
+//and the structure is mostly from https://developer.android.com/guide/topics/ui/layout/recyclerview and some youtube videos
 class BankDollarAdapter(val coins: ArrayList<Coin>) :
         RecyclerView.Adapter<BankDollarAdapter.ViewHolder>() {
     // Provide a reference to the views for each data item
@@ -20,6 +21,7 @@ class BankDollarAdapter(val coins: ArrayList<Coin>) :
     // Each data item is just a string in this case that is shown in a TextView.
 
 
+    // Return the size of your dataset (invoked by the layout manager)
     override fun getItemCount() : Int{
         return coins.size
     }
@@ -39,6 +41,7 @@ class BankDollarAdapter(val coins: ArrayList<Coin>) :
 
         holder.bindItems(coins[position])
         val button =holder.itemView.findViewById(R.id.toGold) as Button
+        //when togold button is pressed, remove this coin from the bank coinlist
         button.setOnClickListener{
             button.isClickable=false
             Handler().postDelayed({
@@ -51,20 +54,22 @@ class BankDollarAdapter(val coins: ArrayList<Coin>) :
     }
 
     private fun removeitem(coin: Coin) {
+        //remove this item from recycler view
         val position=coins.indexOf(coin)
         coins.removeAt(position)
         notifyItemRemoved(position)
+        //call the convert Gold funtion and remove coin from list
         BankObject.convertGold(coin)
         BankObject.bank.coinlist.remove(coin)
 
 
     }
 
-    // Return the size of your dataset (invoked by the layout manager)
 
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView){
         fun bindItems(coin: Coin) {
+            //display coin currency and value to designated field
             val currency = itemView.findViewById(R.id.textViewCurrency) as TextView
             val value = itemView.findViewById(R.id.textViewValue) as TextView
             currency.text = coin.currency

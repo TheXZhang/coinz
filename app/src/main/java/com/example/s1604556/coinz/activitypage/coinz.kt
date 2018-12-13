@@ -46,7 +46,8 @@ import kotlinx.android.synthetic.main.activity_coinz.*
 import java.time.LocalDate
 
 class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,PermissionsListener {
-
+    //main page for this app, this is the map viewing page
+    //the displaying mapbox functions are taken directly from lecture note
     private val tag = "MainActivity"
     private var mapView: MapView? = null
     private var map: MapboxMap? = null
@@ -57,6 +58,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     private lateinit var permissionsManager : PermissionsManager
     private lateinit var locationEngine : LocationEngine
     private lateinit var locationLayerPlugin : LocationLayerPlugin
+    //if map and current location is not ready, this is false so player cannot collect coins now
     private var _initializing : Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -72,7 +74,8 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         mapView?.onCreate(savedInstanceState)
         mapView?.getMapAsync(this)
 
-        var date=""
+        //get the date for today
+        val date: String
         if (LocalDate.now().dayOfMonth<10) {
             date = "${LocalDate.now().year}/${LocalDate.now().monthValue}/0${LocalDate.now().dayOfMonth}"
             Log.d("testing", "'$date'")
@@ -81,8 +84,10 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
             Log.d("testing", "'$date'")
         }
 
+        //use the date today to create a new download link so tie coinzmap are up to date
         val downloadlink = "http://homepages.inf.ed.ac.uk/stg/coinz/$date/coinzmap.geojson"
 
+        //download geojson file from the link
         DownloadFileTask(DownloadCompleteRunner).execute(downloadlink)
 
 
@@ -94,7 +99,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         if (mapboxMap == null){
             Log.d(tag, "[onMapReady] mapboxMap is null")
         }else{
-
+            //when preparing map, we call the this function to create the coinslist needed for displaying
             createCoinList()
 
 
@@ -108,12 +113,10 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
 
             var ic: com.mapbox.mapboxsdk.annotations.Icon
-
-
             val removelist = ArrayList<Coin>()
 
 
-
+            //for all the coins in the coin list, if any of these matches the collected coins, add to the removelist
             for (coin in coinList){
                 for (id in WalletObject.collectedID){
                     if (coin.id==id){
@@ -122,10 +125,12 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 }
             }
 
+            //remove those collected from coinlist
             for (coin in removelist){
                 coinList.remove(coin)
             }
 
+            //for every coin in the coinlist, make a marker to the colour required and add the marker to the map
             for (coin in coinList){
 
                 ic = when (coin.colour) {
@@ -206,6 +211,8 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         if (location == null){
             Log.d(tag,"[onLocationChanged] location is null")
         }else{
+            //if originallocation is not found or initialized, we proceed to obtain current location
+            //otherwise, meausre the distance between current position and previous position and store it for achievement uses
             if(::originLocation.isInitialized){
                 val prevLatLng=LatLng(originLocation.latitude,originLocation.longitude)
                 val currentLatLng=LatLng(location.latitude,location.longitude)
@@ -216,6 +223,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 distance.setValue(WalletObject.Distance)
                 originLocation = location
                 setCameraPosition(originLocation)
+                //making sure initialising is successful, so that button press does not crash the app
                 _initializing= true
             }else {
                 originLocation = location
@@ -257,14 +265,19 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
         collect.setOnClickListener {
             if (!_initializing) {
+                //so if initializing is still false. if collect button is pressed, we tell user that they need to wait
                 Toast.makeText(this@coinz, "Please wait while locate your position", Toast.LENGTH_SHORT).show()
+                //this part is to make sure button are not allowing double clicking, avoding starting multiple same activity or crashes
+                //this apply to all postDelay used, not repeating this comment for other buttons
                 collect.isClickable=false
                 Handler().postDelayed({
                     collect.isClickable=true
                 },500)
 
             }else{
+                //if current postion is found, we get the player position and call Wallet Object to detect any coins that are within 25m radius
                 val playerposition=LatLng(originLocation.latitude,originLocation.longitude)
+                //return a list with left coins
                 val newlist= WalletObject.collectingCoins(playerposition,coinList)
                 collect.isClickable=false
                 Handler().postDelayed({
@@ -272,9 +285,11 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
                 },500)
 
                 if(WalletObject.wallet.currentNo==WalletObject.wallet.limit) {
+                    //if we have reached the wallet limit, display a message to tell the user
                     Toast.makeText(this@coinz, "Your have reached your wallet limit, considering update the limit", Toast.LENGTH_SHORT).show()
                     renewMap(newlist)
                 }else{
+                    //renew map with remaining coins
                     renewMap(newlist)
                 }
             }
@@ -282,6 +297,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
 
         wallet.setOnClickListener{
+            //start wallet activity
             val intent = Intent(this, WalletScreen::class.java)
             startActivity(intent)
             wallet.isClickable=false
@@ -291,6 +307,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
 
         bank.setOnClickListener{
+            //start bank activity
             val intent = Intent(this, Bankscreen::class.java)
             startActivity(intent)
             bank.isClickable=false
@@ -301,6 +318,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         }
 
         achievement.setOnClickListener{
+            //start achievement activity
             val intent = Intent(this, Achievement::class.java)
             startActivity(intent)
             achievement.isClickable=false
@@ -315,6 +333,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
     private fun renewMap(coins:ArrayList<Coin>){
         var ic: com.mapbox.mapboxsdk.annotations.Icon
+        //first clear the map, then add new makers to the map
         map?.clear()
         for (coin in coins){
 
@@ -334,9 +353,10 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
     }
 
     private fun createCoinList(){
+        //as in lecture slides, extract information from geojson file and make it into a list of coins
         val fc = FeatureCollection.fromJson(DownloadCompleteRunner.result)
         val feature =fc.features()
-
+        //extract exchange rate
         val parser = JsonParser()
         val jobject=parser.parse(DownloadCompleteRunner.result) as JsonObject
         val ratelist =jobject.get("rates") as JsonObject
@@ -362,22 +382,4 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
 
     }
 
-
-
-
-   /* override fun onCreateOptionsMenu(menu: Menu): Boolean {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        menuInflater.inflate(R.menu.menu_coinz, menu)
-        return true
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        return when (item.itemId) {
-            R.id.action_settings -> true
-            else -> super.onOptionsItemSelected(item)
-        }
-    }*/
 }

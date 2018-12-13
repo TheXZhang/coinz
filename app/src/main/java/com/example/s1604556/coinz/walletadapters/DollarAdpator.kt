@@ -20,14 +20,11 @@ import com.google.firebase.database.DataSnapshot
 import com.google.firebase.database.DatabaseError
 import com.google.firebase.database.FirebaseDatabase
 import com.google.firebase.database.ValueEventListener
-
+//the following code will be exactly the same as in all other adapter pages for bank, with very slight differences will not repeat unnecessary comment
+//and the structure is mostly from https://developer.android.com/guide/topics/ui/layout/recyclerview and some youtube videos
 
 class DollarAdapter(val coins: ArrayList<Coin>) :
         RecyclerView.Adapter<DollarAdapter.ViewHolder>() {
-    // Provide a reference to the views for each data item
-    // Complex data items may need more than one view per item, and
-    // you provide access to all the views for a data item in a view holder.
-    // Each data item is just a string in this case that is shown in a TextView.
 
 
     override fun getItemCount() : Int{
@@ -49,22 +46,25 @@ class DollarAdapter(val coins: ArrayList<Coin>) :
 
         holder.bindItems(coins[position])
         val button =holder.itemView.findViewById(R.id.toBank) as Button
+        //if to bank button is pressed, move the coin to bank, see more detail in remove item function below
         button.setOnClickListener{
             button.isClickable=false
             Handler().postDelayed({
                 button.isClickable=true
             },2000)
+            //if 25 deposit limit is not met, allow user to bank the coin
             if(BankObject.depositedToday<25){
                 removeitem(currentCoin)
                 BankObject.depositedToday=BankObject.depositedToday+1
             }else{
+                //otherwise alert user they have reached limit
                 val context =holder.itemView.context
                 Toast.makeText(context,"You have reached your 25 coins daily deposit limit", Toast.LENGTH_SHORT).show()
             }
         }
 
         val sendbutton =holder.itemView.findViewById(R.id.toFriend) as Button
-
+        //when send button is pressed, coin is send to another user, provided that email field is filled
         sendbutton.setOnClickListener{
             sendbutton.isClickable=false
             Handler().postDelayed({
@@ -86,13 +86,14 @@ class DollarAdapter(val coins: ArrayList<Coin>) :
 
         val friendlistener=object : ValueEventListener {
             override fun onDataChange(dataSnapshot: DataSnapshot) {
-                // Get Post object and use the values to update the UI
+                // looping the datasnapshot from firebase to get target users uid from target use's email
                 for (d in dataSnapshot.children){
                     if(d.child("Email").getValue(String::class.java)==email){
                         targetUid= d.ref.key!!
                         val limit=d.child("wallet").child("limit").getValue(Int::class.java)
                         val currentNo =d.child("wallet").child("currentNo").getValue(Int::class.java)
                         val playerReference = FirebaseDatabase.getInstance().reference.child("users").child(targetUid).child("wallet")
+                        //once the target user is found, check if their wallet is full, if not full, remove this coin from current user and add it to the target user at firebase
                         if(currentNo!! < limit!!) {
                             playerReference.child("coinlist").child(coin.id).setValue(coin)
                             val position=coins.indexOf(coin)
@@ -100,6 +101,7 @@ class DollarAdapter(val coins: ArrayList<Coin>) :
                             notifyItemRemoved(position)
                             WalletObject.wallet.coinlist.remove(coin)
                         }else{
+                            //if targer user's wallet is full, display a message for current user
                             Toast.makeText(context,"The player's wallet limit has reached", Toast.LENGTH_SHORT).show()
                         }
                     }
@@ -118,9 +120,11 @@ class DollarAdapter(val coins: ArrayList<Coin>) :
 
 
     private fun removeitem(coin: Coin) {
+        //remove item from recyler view
         val position=coins.indexOf(coin)
         coins.removeAt(position)
         notifyItemRemoved(position)
+        //remove coin from the wallet coinlist and update current no of coins in the wallet, add this coin to the bank coin list
         WalletObject.wallet.coinlist.remove(coin)
         WalletObject.wallet.currentNo= WalletObject.wallet.coinlist.size
         BankObject.bank.coinlist.add(coin)

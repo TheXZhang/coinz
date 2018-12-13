@@ -13,7 +13,8 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.database.FirebaseDatabase
 import kotlinx.android.synthetic.main.activity_coinz.*
 
-
+//the following code will be exactly the same as in all other coin pages for wallet, with very slight differences,will not repeat unnecessary comment
+//and the structure is mostly from https://developer.android.com/guide/topics/ui/layout/recyclerview
 class DollarPage : AppCompatActivity() {
     private lateinit var recyclerView: RecyclerView
     private lateinit var viewAdapter: RecyclerView.Adapter<*>
@@ -54,7 +55,7 @@ class DollarPage : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
-
+        //when exiting this activity, update wallet information of current player in the database
         val auth = FirebaseAuth.getInstance()
         val walletReference = FirebaseDatabase.getInstance().reference
                 .child("users").child(auth.currentUser?.uid!!).child("wallet")

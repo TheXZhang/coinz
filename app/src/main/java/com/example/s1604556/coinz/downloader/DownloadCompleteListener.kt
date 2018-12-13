@@ -1,5 +1,6 @@
 package com.example.s1604556.coinz.downloader
 
+//taken from lecture, modification is made to var result, from it can be null to it being empty string ""
 interface DownloadCompleteListener {
     fun downloadComplete(result: String)
 }

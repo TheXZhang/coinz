@@ -12,9 +12,12 @@ class Bankscreen : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.bank_activity)
+        //display current gold
         displayGold.text = BankObject.bank.gold.toString()
     }
-    fun bank_dollar(view: View){
+
+    //the following buttons will start activity for the corresponding coin page
+    fun bankdollar(view: View){
         view.isClickable=false
         Handler().postDelayed({
             view.isClickable=true
@@ -24,7 +27,7 @@ class Bankscreen : AppCompatActivity(){
         startActivity(intent)
     }
 
-    fun bank_peny(view: View){
+    fun bankpeny(view: View){
         view.isClickable=false
         Handler().postDelayed({
             view.isClickable=true
@@ -33,7 +36,7 @@ class Bankscreen : AppCompatActivity(){
         startActivity(intent)
     }
 
-    fun bank_shil(view: View){
+    fun bankshil(view: View){
         view.isClickable=false
         Handler().postDelayed({
             view.isClickable=true
@@ -42,7 +45,7 @@ class Bankscreen : AppCompatActivity(){
         startActivity(intent)
     }
 
-    fun bank_quid(view: View){
+    fun bankquid(view: View){
         view.isClickable=false
         Handler().postDelayed({
             view.isClickable=true
@@ -53,6 +56,7 @@ class Bankscreen : AppCompatActivity(){
 
     override fun onResume() {
         super.onResume()
+        //when returning from other page(coins pages in bank), update the gold displayed
         displayGold.text = BankObject.bank.gold.toString()
 
     }

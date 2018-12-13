@@ -12,6 +12,7 @@ object BankObject{
     var depositedToday =0
 
     fun convertGold(coin: Coin){
+        //converting gold using the current rate.
         val currency = coin.currency
         when (currency){
             "SHIL" -> bank.gold= bank.gold + shilRate.times(coin.value.toDouble())

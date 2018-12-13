@@ -6,6 +6,7 @@ import com.google.firebase.database.*
 import com.mapbox.mapboxsdk.geometry.LatLng
 
 object WalletObject {
+    //radius for collecting is 25m
     val radius= 25
     var wallet= Wallet(coinlist = ArrayList(), limit = 0, currentNo = 0)
     private lateinit var walletReference : DatabaseReference
@@ -19,10 +20,11 @@ object WalletObject {
 
 
 
-
+    //coin collecting function
     fun collectingCoins(playerPosition:LatLng,coinList:ArrayList<Coin>): ArrayList<Coin> {
         val removelist = ArrayList<Coin>()
 
+        //calculate all coins, if their are within the 25m radius of player, add to the remove list
         for (coin in coinList) {
             val distance = playerPosition.distanceTo(coin.position)
             if (distance<= radius)  {
@@ -30,15 +32,17 @@ object WalletObject {
             }
         }
 
-
+        //if wallet is not full, add this coin to wallet and update the coins list
         for (coin in removelist) {
             if (wallet.currentNo < wallet.limit) {
                 coinList.remove(coin)
                 wallet.coinlist.add(coin)
                 wallet.currentNo = wallet.currentNo + 1
 
+                //add this collected coin id to list
                 collectedID.add(coin.id)
 
+                //update firebase with these information
                 val auth = FirebaseAuth.getInstance()
                 walletReference = FirebaseDatabase.getInstance().reference
                         .child("users").child(auth.currentUser?.uid!!).child("wallet")
@@ -50,10 +54,11 @@ object WalletObject {
                 coinIDToday.setValue(collectedID)
             } else {
                 return ArrayList()
+                //return a coinlist for updating map
             }
 
         }
-
+        //return a coinlist for updating map
         return coinList
     }
 

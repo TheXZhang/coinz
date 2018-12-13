@@ -17,13 +17,16 @@ class WalletScreen : AppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.wallet_activity)
+        //display current wallet limit status
         curlimit.text = WalletObject.wallet.coinlist.size.toString()+"/"+WalletObject.wallet.limit.toString()
+        //remaining deposit chances
         depositLeft.text=(25-BankObject.depositedToday).toString()
         var shilNo=0
         var dolarNo=0
         var quidNo=0
         var penyNo=0
 
+        //this step calculate the number of coin for each currency, and display it on UI
         for (coin in WalletObject.wallet.coinlist){
             when (coin.currency){
                 "SHIL" -> shilNo=shilNo+1
@@ -39,6 +42,7 @@ class WalletScreen : AppCompatActivity(){
 
 
     }
+    //the following function starts corresponding coins page
 
     fun dollar(view: View){
         view.isClickable=false
@@ -77,15 +81,18 @@ class WalletScreen : AppCompatActivity(){
         startActivity(intent)
     }
 
+    //upgrade limit of wallet, this is a bonus feature i added
     fun upgradeLimit(view: View){
         view.isClickable=false
         Handler().postDelayed({
             view.isClickable=true
         },2000)
+        //if player bank has less than 1000 gold, they will be told they dont have enought gold
         if (BankObject.bank.gold<1000){
             Toast.makeText(baseContext, "No enough Gold in you bank, make sure you have at least 1000 gold",
                     Toast.LENGTH_SHORT).show()
         }else {
+            //otherwise, upgrade wallet limit by 10, and update firebase with these information
             view.isClickable = false
             Handler().postDelayed({
                 view.isClickable = true
@@ -105,6 +112,7 @@ class WalletScreen : AppCompatActivity(){
 
     override fun onResume() {
         super.onResume()
+        //when returnninng from other coin pages, re-display number of coins for each currency, as they may have been send to bank or friend
         depositLeft.text=(25-BankObject.depositedToday).toString()
         curlimit.text = WalletObject.wallet.coinlist.size.toString()+"/"+WalletObject.wallet.limit.toString()
 

@@ -7,7 +7,7 @@ import java.io.InputStream
 import java.net.HttpURLConnection
 import java.net.URL
 
-
+//taken directly from lecture note, no modification made
 class DownloadFileTask(private val caller : DownloadCompleteListener):
         AsyncTask<String, Void, String>(){
 
