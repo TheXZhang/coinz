@@ -3,7 +3,6 @@ package com.example.s1604556.coinz.activitypage
 import android.content.Intent
 import android.os.Bundle
 import android.os.Handler
-import android.provider.ContactsContract
 import android.support.v7.app.AppCompatActivity
 import android.text.TextUtils
 import android.util.Log
@@ -15,6 +14,7 @@ import com.example.s1604556.coinz.wallet.WalletObject
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import com.google.firebase.database.*
+
 
 
 import kotlinx.android.synthetic.main.auth_activity.*

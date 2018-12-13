@@ -6,7 +6,7 @@ import com.google.firebase.database.*
 import com.mapbox.mapboxsdk.geometry.LatLng
 
 object WalletObject {
-    val radius= 6900
+    val radius= 25
     var wallet= Wallet(coinlist = ArrayList(), limit = 0, currentNo = 0)
     private lateinit var walletReference : DatabaseReference
     private lateinit var coinIDToday : DatabaseReference
