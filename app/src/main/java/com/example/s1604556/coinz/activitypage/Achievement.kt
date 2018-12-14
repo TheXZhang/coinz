@@ -50,6 +50,8 @@ class Achievement : AppCompatActivity(),View.OnClickListener{
                 },2000)
                 BankObject.bank.gold=BankObject.bank.gold+1000.0
                 WalletObject.claim1=true
+                claimed1.visibility=View.VISIBLE
+                oneKbutton.visibility=View.GONE
             }
             R.id.tenKbutton -> {
                 tenKbutton.isClickable=false
@@ -58,6 +60,8 @@ class Achievement : AppCompatActivity(),View.OnClickListener{
                 },2000)
                 BankObject.bank.gold=BankObject.bank.gold+10000.0
                 WalletObject.claim2=true
+                claimed2.visibility=View.VISIBLE
+                tenKbutton.visibility=View.GONE
             }
             R.id.onehkbutton -> {
                 onehkbutton.isClickable=false
@@ -66,6 +70,8 @@ class Achievement : AppCompatActivity(),View.OnClickListener{
                 },2000)
                 BankObject.bank.gold=BankObject.bank.gold+100000.0
                 WalletObject.claim3=true
+                claimed3.visibility=View.VISIBLE
+                onehkbutton.visibility=View.GONE
             }
             R.id.tenMbutton -> {
                 tenMbutton.isClickable=false
@@ -74,6 +80,8 @@ class Achievement : AppCompatActivity(),View.OnClickListener{
                 },2000)
                 BankObject.bank.gold=BankObject.bank.gold+10000000.0
                 WalletObject.claim4=true
+                claimed4.visibility=View.VISIBLE
+                tenMbutton.visibility=View.GONE
             }
         }
     }

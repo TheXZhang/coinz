@@ -7,7 +7,7 @@ import com.mapbox.mapboxsdk.geometry.LatLng
 
 object WalletObject {
     //radius for collecting is 25m
-    val radius= 25
+    val radius= 150
     var wallet= Wallet(coinlist = ArrayList(), limit = 0, currentNo = 0)
     private lateinit var walletReference : DatabaseReference
     private lateinit var coinIDToday : DatabaseReference

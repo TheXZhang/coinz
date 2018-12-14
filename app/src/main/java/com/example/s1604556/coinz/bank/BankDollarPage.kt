@@ -59,6 +59,8 @@ class BankDollarPage : AppCompatActivity() {
         val auth = FirebaseAuth.getInstance()
         val bankReference = FirebaseDatabase.getInstance().reference
                 .child("users").child(auth.currentUser?.uid!!).child("bank")
-        bankReference.setValue(BankObject.bank)
+        bankReference.child("coinlist").setValue(BankObject.bank.coinlist)
+        bankReference.child("gold").setValue(BankObject.bank.gold)
+
     }
 }
