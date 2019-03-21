@@ -67,7 +67,7 @@ class coinz : AppCompatActivity(), OnMapReadyCallback, LocationEngineListener,Pe
         //setSupportActionBar(toolbar)
 
 
-        getInstance(this,"pk.eyJ1IjoiczE2MDQ1NTYiLCJhIjoiY2pud2Y5ZXB4MDFhNDNxbjdueDg2YTFubCJ9.mDJ39QOCIA1DBnpFuVZC9A")
+        getInstance(this,"~~~~~~~~~~~API key goes here")
 
         mapView = findViewById(R.id.mapboxMapView)
 
